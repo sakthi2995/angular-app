@@ -2,9 +2,10 @@ import { BrowserModule } from "@angular/platform-browser";
 import { NgModule } from "@angular/core";
 
 import { AppComponent } from "./app.component";
-import { HttpClient, HttpClientModule } from "@angular/common/http";
+import { HttpClient, HttpClientModule, HTTP_INTERCEPTORS } from "@angular/common/http";
 import { TranslateModule, TranslateLoader } from '@ngx-translate/core';
 import { TranslateHttpLoader } from '@ngx-translate/http-loader';
+import { AddHeaderInterceptorService } from "./interceptor/add-header-interceptor.service";
 
 export function HttpLoaderFactory(httpClient: HttpClient) {
   return new TranslateHttpLoader(httpClient);
@@ -19,7 +20,13 @@ export function HttpLoaderFactory(httpClient: HttpClient) {
       deps: [HttpClient]
     }
   })],
-  providers: [],
+  providers: [
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: AddHeaderInterceptorService,
+      multi: true
+    },
+  ],
   bootstrap: [AppComponent],
 })
 export class AppModule { }
