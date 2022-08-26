@@ -52,3 +52,17 @@ p {
   width: 50%;
   padding: 40px;
 }
+
+
+.displayDetails {
+  padding-right: 27px;
+}
+
+.active {
+  cursor: pointer;
+}
+
+.disabled {
+  background-color: lightgrey;
+  cursor: not-allowed;
+}

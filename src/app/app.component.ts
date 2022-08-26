@@ -1,4 +1,5 @@
 import { Component, OnInit } from "@angular/core";
+import { TranslateService } from '@ngx-translate/core';
 import { PostsService } from "./services/posts.service";
 import { ICustomer } from "./app.component.types";
 
@@ -7,70 +8,83 @@ import { ICustomer } from "./app.component.types";
   templateUrl: "./app.component.html",
   styleUrls: ["./app.component.css"],
 })
-export class AppComponent implements OnInit {
-  title = "poc-app";
-  customers: ICustomer[];
-  locationData = [
-    {
-      location: "Ontario",
-      code: "ON",
-    },
-    {
-      location: "Quebec",
-      code: "QC",
-    },
-    {
-      location: "Nova Scotia",
-      code: "NS",
-    },
-    {
-      location: "New Brunswick",
-      code: "NB",
-    },
-    {
-      location: "Manitoba",
-      code: "MB",
-    },
-    {
-      location: "British Columbia",
-      code: "BC",
-    },
-    {
-      location: "Prince Edward Island",
-      code: "PE",
-    },
-    {
-      location: "Saskatchewan",
-      code: "SK",
-    },
-    {
-      location: "Alberta",
-      code: "AB",
-    },
-    {
-      location: "Newfoundland and Labrador",
-      code: "NL",
-    },
-  ];
-  name: any;
 
-  constructor(private service: PostsService) {}
+export class AppComponent implements OnInit {
+  customers: ICustomer[];
+  locationData = {
+    "ON": "Ontario",
+    "QC": "Quebec",
+    "NS": "Nova Scotia",
+    "NB": "New Brunswick",
+    "MB": "Manitoba",
+    "BC": "British Canada",
+    "PE": "Prince Edward Island",
+    "SK": "Saskatchewan",
+    "AB": "Alberta",
+    "NL": "Newfoundland and Labrador"
+  };
+  error: string;
+  showModal = false
+  showModalRowClick = false
+  customerData = {
+    name: '',
+    location: '',
+    id: 0,
+  }
+
+  constructor(private service: PostsService, public translate: TranslateService) {
+    translate.addLangs(['en']);
+    translate.setDefaultLang('en');
+
+    const browserLang = translate.getBrowserLang();
+    const pattern = /en/;
+    translate.use(browserLang.match(pattern) ? browserLang : 'en');
+  }
 
   ngOnInit() {
+    // Fetching customer details.
     this.service.getCustomers().subscribe((response) => {
       this.customers = this.updateCustomers(response);
-      console.log(this.updateCustomers(response));
-    });
+      // Posting first customer information.
+      this.service.postCustomer(response[0]).subscribe(() => {
+        console.log("successfully posted customer data.")
+      }, (error) => {
+        this.error = error.statusText;
+        this.showModal = true;
+        setTimeout(() => {
+          this.showModal = false
+        }, 5000)
+      })
+    }, (error) => {
+      this.error = error.statusText
+      this.showModal = true
+      setTimeout(() => {
+        this.showModal = false
+      }, 5000)
+    })
   }
 
   updateCustomers(customers) {
     return customers.map((item) => {
       const { name, ...rest } = item;
       const [firstName, lastName] = name.split(" ");
-      const loc = this.locationData.find(({ code }) => code === item.location);
-      if (loc) {
-        return { ...rest, firstName, lastName, province: loc.location };
-      } else return { ...rest, firstName, lastName, province: "" };
+      const province = this.locationData[rest.location];
+      return { ...rest, firstName, lastName, province: province || '' };
     });
+  }
+
+  closeModal() {
+    this.showModal = false
+  }
+
+  openModal(customer: ICustomer) {
+    this.showModalRowClick = customer.active;
+    this.customerData.name = customer.firstName + " " + customer.lastName
+    this.customerData.location = customer.province
+    this.customerData.id = customer.id
+  }
+
+  closeModalData() {
+    this.showModalRowClick = false
   }
 }

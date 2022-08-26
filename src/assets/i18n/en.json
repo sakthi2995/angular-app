@@ -1,0 +1,9 @@
+{
+    "HOME": {
+        "ID": "ID",
+        "FIRST_NAME": "First Name",
+        "LAST_NAME": "Last Name",
+        "LOCATION": "Location",
+        "PROVINCE": "Province"
+    }
+}
